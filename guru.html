@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Semakan Guru – Escape Room Jawi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap"><style>
+:root{--bg:#f4f6fb;--fg:#1b2240;--card:#fff;--ac:#2d7ff9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a33;--fg:#eef;--card:#222b50}}
+:root[data-theme="dark"]{--bg:#141a33;--fg:#eef;--card:#222b50}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:12px;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+.card{background:var(--card);border-radius:12px;padding:12px;margin:10px 0}
+textarea{width:100%;height:140px;box-sizing:border-box;font-size:14px}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:10px 16px;margin:4px 4px 0 0;font-size:15px}
+.t{overflow-x:auto}table{border-collapse:collapse;font-size:14px;width:100%}td,th{border:1px solid #889;padding:5px;text-align:center;white-space:nowrap}
+.x{color:#d33}.y{color:#1a9a4a}.j{direction:rtl;font-size:20px;font-family:"Scheherazade New","Noto Naskh Arabic",serif}
+</style></head><body>
+<h2>📋 Semakan Guru – Escape Room Jawi Tahun 5 (-an)</h2>
+<div class="card"><p>Tampal semua mesej WhatsApp murid (yang mengandungi <b>Kod markah</b>) di bawah, kemudian tekan Semak.</p>
+<textarea id="i" placeholder="Tampal mesej / kod JAWI5-... di sini"></textarea><br><button onclick="run()">Semak & Kumpul Markah</button><button onclick="csv()">Salin CSV (Excel)</button><span id="st"></span></div>
+<div class="card t"><table id="tb"></table></div>
+<div class="card"><b>Kunci jawapan (guru sahaja)</b><div id="kj"></div></div>
+<script>
+const Q=[["Akhiran -an pada kata dasar suku kata tertutup","ـن"],["سوکت","سوکتن"],["سبوت","سبوتن"],["ڤوجي","ڤوجين"],["تاري","تارين"],["جوتا","جوتاءن"],["دريتا","دريتاءن"],["باچ","باچاءن"],["دوک","دوکاءن"],["کسيلاو","کسيلاوان"]];
+const $=i=>document.getElementById(i),hs=s=>{let h=5381;for(const x of s)h=((h<<5)+h+x.charCodeAt(0)+7)>>>0;return h.toString(36)};
+Q.length=0;Q.push(["Peraturan akhiran -an (bunyi au/u)","ـان"],["Suku kata tertutup","ـن"],["Kata dasar berakhir huruf ا","ـءن"],["sukat","سوکتن"],["sebut","سبوتن"],["puji","ڤوجين"],["tari","تارين"],["juta","جوتاءن"],["derita","دريتاءن"],["baca","باچاءن"],["duka","دوکاءن"],["kesilau","کسيلاوان"],["kesukaan","کسوکاءن"],["kepulauan","کڤولاوان"],["perniagaan","ڤرنياݢاءن"],["buruan","بوروان"],["ulasan","اولسن"],["Bukan akhiran ـن","بوروان"],["sambutan","سمبوتن"],["persatuan","ڤرساتوان"]);Q.push(["kemajuan","کماجوان"],["arahan","ارهن"],["kegembiraan","کݢمبيراءن"],["permintaan","ڤرمينتاءن"],["keikhlasan","کأخلاصن"]);$('kj').innerHTML='<ol>'+Q.map(q=>'<li>'+(q[0].length>3&&/[A-Za-z]/.test(q[0])?q[0]:'<span class="j">'+q[0]+'</span> + an')+' = <b class="j">'+q[1]+'</b></li>').join('')+'</ol>';
+let rows=[];
+function run(){const seen={};rows=[];let bad=0;
+(($('i').value.match(/JAWI5-[A-Za-z0-9_-]+/g))||[]).forEach(cd=>{if(seen[cd])return;seen[cd]=1;const k=cd.lastIndexOf('-'),b=cd.slice(6,k),h=cd.slice(k+1);
+try{const p=decodeURIComponent(escape(atob(b.replace(/-/g,'+').replace(/_/g,'/'))));if(hs(p+'jawi5')!==h)throw 0;const a=p.split('|');rows.push({n:a[0],k:a[1],b:+a[2],s:+a[3],m:+a[4],t:+a[5],r:a[6]})}catch(e){bad++}});
+rows.sort((a,b)=>b.m-a.m||a.t-b.t);
+let h='<tr><th>Bil</th><th>Nama</th><th>Kelas</th><th>Betul</th><th>Salah</th><th>Markah</th><th>Masa(s)</th>'+Q.map((_,i)=>'<th>S'+(i+1)+'</th>').join('')+'</tr>';
+rows.forEach((r,i)=>{h+='<tr><td>'+(i+1)+'</td><td>'+r.n.replace(/</g,'&lt;')+'</td><td>'+r.k.replace(/</g,'&lt;')+'</td><td>'+r.b+'</td><td>'+r.s+'</td><td><b>'+r.m+'</b></td><td>'+r.t+'</td>'+[...r.r].map(x=>x=='1'?'<td class="y">✔</td>':'<td class="x">✖</td>').join('')+'</tr>'});
+if(rows.length){h+='<tr><th colspan="7">% betul</th>'+Q.map((_,i)=>'<th>'+Math.round(rows.filter(r=>r.r[i]=='1').length/rows.length*100)+'%</th>').join('')+'</tr>'}
+$('tb').innerHTML=h;$('st').textContent=rows.length+' murid sah'+(bad?', '+bad+' kod tidak sah/diubah':'')}
+function csv(){const t='Nama,Kelas,Betul,Salah,Markah,Masa\n'+rows.map(r=>[r.n,r.k,r.b,r.s,r.m,r.t].join(',')).join('\n');const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{navigator.clipboard.writeText(t)}catch(e){document.execCommand('copy')}a.remove();$('st').textContent='CSV disalin – tampal dalam Excel/Sheets'}
+</script></body></html>
